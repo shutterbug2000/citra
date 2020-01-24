@@ -47,6 +47,11 @@ namespace DiscordRPC {
 class DiscordInterface;
 }
 
+enum class EmulatedDirectoryTarget {
+    NAND,
+    SDMC,
+};
+
 class GMainWindow : public QMainWindow {
     Q_OBJECT
 
@@ -177,6 +182,8 @@ private slots:
     void OnUpdateProgress(std::size_t written, std::size_t total);
     void OnCIAInstallReport(Service::AM::InstallStatus status, QString filepath);
     void OnCIAInstallFinished();
+    /// Called whenever a user select the "File->Select -- Directory" where -- is NAND or SD Card
+    void OnMenuSelectEmulatedDirectory(EmulatedDirectoryTarget target);
     void OnMenuRecentFile();
     void OnConfigure();
     void OnLoadAmiibo();

@@ -139,7 +139,7 @@ void SetUserPath(const std::string& path = "");
 
 // Returns a pointer to a string with a Citra data dir in the user's home
 // directory. To be used in "multi-user" mode (that is, installed).
-const std::string& GetUserPath(UserPath path);
+const std::string& GetUserPath(UserPath path, const std::string& new_path = "");
 
 // Returns the path to where the sys file are
 std::string GetSysDirectory();

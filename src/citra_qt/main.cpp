@@ -6,6 +6,7 @@
 #include <memory>
 #include <thread>
 #include <QDesktopWidget>
+#include <QDialogButtonBox>
 #include <QFileDialog>
 #include <QFutureWatcher>
 #include <QMessageBox>
@@ -596,6 +597,10 @@ void GMainWindow::ConnectMenuEvents() {
     connect(ui.action_Exit, &QAction::triggered, this, &QMainWindow::close);
     connect(ui.action_Load_Amiibo, &QAction::triggered, this, &GMainWindow::OnLoadAmiibo);
     connect(ui.action_Remove_Amiibo, &QAction::triggered, this, &GMainWindow::OnRemoveAmiibo);
+    connect(ui.action_Select_NAND_Directory, &QAction::triggered, this,
+            [this] { OnMenuSelectEmulatedDirectory(EmulatedDirectoryTarget::NAND); });
+    connect(ui.action_Select_SDMC_Directory, &QAction::triggered, this,
+            [this] { OnMenuSelectEmulatedDirectory(EmulatedDirectoryTarget::SDMC); });
 
     // Emulation
     connect(ui.action_Start, &QAction::triggered, this, &GMainWindow::OnStartGame);
@@ -1299,6 +1304,28 @@ void GMainWindow::OnCIAInstallFinished() {
     ui.action_Install_CIA->setEnabled(true);
     game_list->PopulateAsync(UISettings::values.game_dirs);
 }
+
+void GMainWindow::OnMenuSelectEmulatedDirectory(EmulatedDirectoryTarget target) {
+    const auto res = QMessageBox::information(
+        this, tr("Changing Emulated Directory"),
+        tr("You are about to change the emulated %1 directory of the system. Please note "
+           "that this does not also move the contents of the previous directory to the "
+           "new one and you will have to do that yourself.")
+            .arg(target == EmulatedDirectoryTarget::SDMC ? tr("SD card") : tr("NAND")),
+        QMessageBox::StandardButtons{QMessageBox::Ok, QMessageBox::Cancel});
+
+    if (res == QMessageBox::Cancel)
+        return;
+
+    QString dir_path = QFileDialog::getExistingDirectory(this, tr("Select Directory"));
+    if (!dir_path.isEmpty()) {
+        FileUtil::GetUserPath(target == EmulatedDirectoryTarget::SDMC ? FileUtil::UserPath::SDMCDir
+                                                                      : FileUtil::UserPath::NANDDir,
+                              dir_path.toStdString());
+        game_list->PopulateAsync(UISettings::values.game_dirs);
+    }
+}
+
 
 void GMainWindow::OnMenuRecentFile() {
     QAction* action = qobject_cast<QAction*>(sender());
